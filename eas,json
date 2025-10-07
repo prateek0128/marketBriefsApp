@@ -28,6 +28,7 @@
       "env": {
         "EXPO_ENV": "preview"
       },
+      "installCommand": "npm install",
       "channel": "preview"
     },
     "production": {
