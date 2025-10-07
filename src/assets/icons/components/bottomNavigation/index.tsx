@@ -1,0 +1,12 @@
+export { default as HomeIcon } from "./HomeIcon";
+export { default as HomeIconFilledDark } from "./HomeIconFilledDark";
+export { default as HomeIconFilledLight } from "./HomeIconFilledLight";
+export { default as InterestesIconFilledDark } from "./InterestesIconFilledDark";
+export { default as InterestesIconFilledLight } from "./InterestesIconFilledLight";
+export { default as InteretsIcon } from "./InteretsIcon";
+export { default as ProfileIcon } from "./ProfileIcon";
+export { default as ProfileIconFilledDark } from "./ProfileIconFilledDark";
+export { default as ProfileIconFilledLight } from "./ProfileIconFilledLight";
+export { default as SavedIconFilledDark } from "./SavedIconFilledDark";
+export { default as SavedIcon } from "./SavedIcon";
+export { default as SavedIconFilledLight } from "./SavedIconFilledLight";

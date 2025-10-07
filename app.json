@@ -1,48 +1,86 @@
 {
   "expo": {
     "name": "theMarketBriefs",
-    "slug": "theMarketBriefs",
+    "slug": "the-market-briefs",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "themarketbriefs",
+    "icon": "src/assets/MarketBriefsLogo.png",
+    "scheme": ["themarketbriefs"],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "runtimeVersion": "1.0.0",
+    "platforms": ["ios", "android", "web"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "usesAppleSignIn": true,
+      "bundleIdentifier": "com.miiscollp.theMarketBriefs",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "LSApplicationQueriesSchemes": ["whatsapp", "instagram", "twitter"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "src/assets/MarketBriefsLogo.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "package": "com.miiscollp.theMarketBriefs",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [{ "scheme": "themarketbriefs", "host": "redirect" }],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
+      "manifest": {
+        "queries": [
+          { "package": "com.whatsapp" },
+          { "package": "com.instagram.android" },
+          { "package": "com.twitter.android" }
+        ]
+      }
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "src/assets/favicon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "src/assets/MarketBriefsLogo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+          "dark": { "backgroundColor": "#000000" }
+        }
+      ],
+      "react-native-edge-to-edge",
+      "expo-font",
+      "expo-web-browser",
+      "expo-localization",
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.484384832433-f0a6hmbj2003jgm55i4dseh0f9dt2dtl"
         }
       ]
     ],
+    "updates": {
+      "url": "https://u.expo.dev/7bf57405-40a9-4568-a643-146cf22fcfcb",
+      "fallbackToCacheTimeout": 0,
+      "enabled": true
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "facebookAppId": "10003059749794444",
+      "eas": { "projectId": "f33c853d-9a15-4136-a388-020733a7a887" }
+    },
+    "owner": "miisco"
   }
 }
