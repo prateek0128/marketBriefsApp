@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "theMarketBriefs",
+    "name": "Market Briefs",
     "slug": "the-market-briefs",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -75,7 +75,7 @@
     },
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "extra": {
       "facebookAppId": "10003059749794444",
