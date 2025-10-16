@@ -131,7 +131,11 @@ const HomeScreen = () => {
     const activeTag = selectedTag === "All" ? "" : selectedTag;
     try {
       // const response = await getHighImpactNews(activeTag, limit ?? 10);
-      const response = await getRecommendedHighImpactNewsByFilter(filterValue);
+      const response = await getRecommendedHighImpactNewsByFilter(
+        filterValue,
+        activeTag,
+        limit ?? 10
+      );
       //console.log("ALLNewsResponse:", JSON.stringify(response.data, null, 2));
       const newsData = response.data.data;
       console.log("newsResponse:", newsData);
@@ -171,7 +175,11 @@ const HomeScreen = () => {
     }
     const activeTag = selectedTag === "All" ? "" : selectedTag;
     try {
-      const response = await getRecommendedHighImpactNewsByFilter(filter);
+      const response = await getRecommendedHighImpactNewsByFilter(
+        filter,
+        activeTag,
+        limitValue
+      );
       console.log(
         "Filtered News Response:",
         JSON.stringify(response.data, null, 2)
@@ -300,7 +308,6 @@ const HomeScreen = () => {
     return timeA - timeB; // ascending (oldest first)
     // return timeB - timeA; // descending (newest first)
   });
-  console.log("SortedData:", sortedData.length);
   const allTags = [
     "All",
     "Stocks",
@@ -309,9 +316,28 @@ const HomeScreen = () => {
     "Crypto",
     "Economy",
   ];
+  // Filter logic to show only tags in "interests" (plus "All" and selectedTag)
+  const visibleTags = [
+    // Always show the selected tag first (if any)
+    ...allTags.filter((tag) => tag === selectedTag),
+
+    // Show "All" if it’s not already selected
+    ...allTags.filter((tag) => tag === "All" && tag !== selectedTag),
+
+    // Show interests that are in allTags and not already added
+    ...allTags.filter(
+      (tag) =>
+        savedInterests.includes(tag) && tag !== selectedTag && tag !== "All"
+    ),
+  ];
   if (loading && !refreshing) return <Loader />;
   return (
-    <View style={[globalStyles.pageContainerWithBackground(theme)]}>
+    <View
+      style={[
+        globalStyles.pageContainerWithBackground(theme),
+        { paddingBottom: 0 },
+      ]}
+    >
       <View style={styles.headingContainer}>
         <View style={styles.headingThemeContainer}>
           <View style={styles.userHeadingContainer}>
@@ -370,24 +396,7 @@ const HomeScreen = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabLabelContainer}
         >
-          {[
-            // first: selectedTag (to always show first if present)
-            ...allTags.filter((tag) => tag === selectedTag),
-
-            // then: "All" and user saved interests (excluding the one already added above)
-            ...allTags.filter(
-              (tag) =>
-                (tag === "All" || savedInterests.includes(tag)) &&
-                tag !== selectedTag
-            ),
-
-            // finally: the rest of the tags (not selected and not in saved interests)
-            ...allTags.filter(
-              (tag) =>
-                tag !== selectedTag &&
-                !(tag === "All" || savedInterests.includes(tag))
-            ),
-          ].map((tag) => (
+          {visibleTags.map((tag) => (
             <TabLabel
               key={tag}
               label={tag}
@@ -471,12 +480,6 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    flex: 1,
-    //flexGrow: 1,
-    backgroundColor: colors.nonaryBackground,
-  },
   headingContainer: {
     marginTop: 0,
     marginBottom: 20,

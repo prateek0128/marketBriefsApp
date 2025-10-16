@@ -163,7 +163,7 @@ const Header = ({
           >
             {theme === "light" ? <ShareIcon /> : <ShareIconWhite />}
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={onClickLink}
             style={[
               styles.leftHeaderPart,
@@ -180,7 +180,7 @@ const Header = ({
             ) : (
               <Feather name="external-link" size={24} color="white" />
             )}
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       )}
       {/* {showThemeIcon && (

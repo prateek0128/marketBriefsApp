@@ -21,6 +21,8 @@ import { RootStackParamList } from "../../../types/navigation";
 import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
 import { colors } from "../../../assets/styles/colors";
 import fontFamily from "../../../assets/styles/fontFamily";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 type ThemeOption = "light" | "dark";
 
 const options = [
@@ -28,9 +30,8 @@ const options = [
   { key: "dark", label: "Dark", icon: "moon-outline" },
 ];
 
-export default function AppearanceScreen() {
+export default function ContactUsScreen() {
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const [selectedTheme, setSelectedTheme] = useState<ThemeOption>(theme);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   useBackPressNavigate("Profile");
   return (
@@ -51,7 +52,7 @@ export default function AppearanceScreen() {
           },
         ]}
       >
-        Appearence
+        Contact Us
       </Text>
       <TouchableOpacity
         style={[
@@ -64,75 +65,43 @@ export default function AppearanceScreen() {
                 ? colors.duodenaryBorderColor
                 : colors.darkQuinaryText,
           },
-          selectedTheme === "light" && {
-            borderColor:
-              theme === "dark" ? colors.vigenaryText : colors.sexdenaryText,
-          },
         ]}
-        onPress={() => {
-          setSelectedTheme("light");
-          if (theme == "dark") {
-            toggleTheme();
-          }
-        }}
+        onPress={() => {}}
       >
         <View style={styles.optionLeft}>
-          <Ionicons
-            name={"sunny-outline"}
-            size={22}
+          <FontAwesome
+            name="phone"
+            size={24}
             color={
-              selectedTheme === "light"
-                ? theme === "dark"
-                  ? colors.vigenaryText
-                  : colors.sexdenaryText
-                : theme == "dark"
-                ? "#fff"
-                : "#303437"
+              theme === "dark" ? colors.vigenaryText : colors.sexdenaryText
             }
           />
-          <Text
-            style={[
-              styles.optionText,
-              {
-                color: theme === "dark" ? colors.white : colors.octodenaryText,
-              },
-              selectedTheme === "light" && {
-                color:
-                  theme === "dark" ? colors.vigenaryText : colors.sexdenaryText,
-              },
-            ]}
-          >
-            {"Light"}
-          </Text>
-        </View>
-        <View
-          style={[
-            styles.radioOuter,
-            {
-              borderColor:
-                theme === "dark"
-                  ? colors.duodenaryBorderColor
-                  : colors.darkQuinaryText,
-            },
-            selectedTheme === "light" && {
-              borderColor:
-                theme === "dark" ? colors.vigenaryText : colors.sexdenaryText,
-            },
-          ]}
-        >
-          {selectedTheme === "light" && (
-            <View
+          <View style={styles.contactDetailsContainer}>
+            <Text
               style={[
-                styles.radioInner,
+                styles.optionText,
                 {
-                  backgroundColor:
+                  color:
+                    theme === "dark" ? colors.white : colors.octodenaryText,
+                },
+              ]}
+            >
+              {"Phone"}
+            </Text>
+            <Text
+              style={[
+                styles.optionText,
+                {
+                  color:
                     theme === "dark"
                       ? colors.vigenaryText
                       : colors.sexdenaryText,
                 },
               ]}
-            />
-          )}
+            >
+              {"+91 9354287590"}
+            </Text>
+          </View>
         </View>
       </TouchableOpacity>
       <TouchableOpacity
@@ -146,75 +115,43 @@ export default function AppearanceScreen() {
                 ? colors.duodenaryBorderColor
                 : colors.darkQuinaryText,
           },
-          selectedTheme === "dark" && {
-            borderColor:
-              theme === "dark" ? colors.vigenaryText : colors.sexdenaryText,
-          },
         ]}
-        onPress={() => {
-          setSelectedTheme("dark");
-          if (theme == "light") {
-            toggleTheme();
-          }
-        }}
+        onPress={() => {}}
       >
         <View style={styles.optionLeft}>
-          <Ionicons
-            name={"moon-outline"}
-            size={22}
+          <MaterialIcons
+            name="email"
+            size={24}
             color={
-              selectedTheme === "dark"
-                ? theme === "dark"
-                  ? colors.vigenaryText
-                  : colors.sexdenaryText
-                : theme == "dark"
-                ? "#fff"
-                : "#303437"
+              theme === "dark" ? colors.vigenaryText : colors.sexdenaryText
             }
           />
-          <Text
-            style={[
-              styles.optionText,
-              {
-                color: theme === "dark" ? colors.white : colors.octodenaryText,
-              },
-              selectedTheme === "dark" && {
-                color:
-                  theme === "dark" ? colors.vigenaryText : colors.sexdenaryText,
-              },
-            ]}
-          >
-            {"Dark"}
-          </Text>
-        </View>
-        <View
-          style={[
-            styles.radioOuter,
-            {
-              borderColor:
-                theme === "dark"
-                  ? colors.duodenaryBorderColor
-                  : colors.darkQuinaryText,
-            },
-            selectedTheme === "dark" && {
-              borderColor:
-                theme === "dark" ? colors.vigenaryText : colors.sexdenaryText,
-            },
-          ]}
-        >
-          {selectedTheme === "dark" && (
-            <View
+          <View style={styles.contactDetailsContainer}>
+            <Text
               style={[
-                styles.radioInner,
+                styles.optionText,
                 {
-                  backgroundColor:
+                  color:
+                    theme === "dark" ? colors.white : colors.octodenaryText,
+                },
+              ]}
+            >
+              {"Email"}
+            </Text>
+            <Text
+              style={[
+                styles.optionText,
+                {
+                  color:
                     theme === "dark"
                       ? colors.vigenaryText
                       : colors.sexdenaryText,
                 },
               ]}
-            />
-          )}
+            >
+              {"smartmaheshwari.app@gmail.com"}
+            </Text>
+          </View>
         </View>
       </TouchableOpacity>
     </View>
@@ -262,22 +199,9 @@ const styles = StyleSheet.create({
   optionText: {
     fontSize: 16,
     fontFamily: fontFamily.Inter500,
+    lineHeight: 18,
   },
-  radioOuterSelected: {
-    borderColor: "#4A46E5",
-  },
-  radioOuter: {
-    height: 22,
-    width: 22,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#aaa",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radioInner: {
-    height: 12,
-    width: 12,
-    borderRadius: 12,
+  contactDetailsContainer: {
+    gap: 8,
   },
 });

@@ -1,83 +1,63 @@
-import React, { useState, useEffect, useContext } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Dimensions,
-  StatusBar,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
-  Image,
-  Linking,
-  Alert,
-} from "react-native";
-import { colors } from "../../../assets/styles/colors";
-import Loader from "../../../components/Loader/loader";
-import { ThemeContext } from "../../../context/themeContext";
-import { getHighImpactNewsById, getNewsFeed } from "../../../apiServices/news";
-import LoaderOverlay from "../../../components/LoadOverlay/loadOverlayTransparent";
-import {
-  FemaleProfileIcon,
-  MaleProfileIcon,
-  LikeCommentIcon,
-  LikeCommentIconFilled,
-  UnlikeCommentIcon,
-  UnlikeCommentIconFilled,
-  CommentIconLight,
-  CommentIconDark,
-  CurrencyImage2,
-  HeartCommentIcon,
-  HeartCommentIconFilled,
-  Positive,
-  Neutral,
-  Worried,
-} from "../../../assets/icons/components/headlineDetailsView";
-import HeadlineDetailCard from "../../../components/headlineDetailedCard/headlineDetailedCard";
-import Tag from "../../../components/tag/tag";
-import { RootStackParamList } from "../../../types/navigation";
-import {
-  useNavigation,
   NavigationProp,
   RouteProp,
+  useNavigation,
   useRoute,
 } from "@react-navigation/native";
-import fontFamily from "../../../assets/styles/fontFamily";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  Alert,
+  Dimensions,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { TextInput } from "react-native-gesture-handler";
-import Header from "../../../components/header/header";
-import ClippedSVG from "../../../components/clippedSVG/clippedSVG";
+import { Divider } from "react-native-paper";
+import { getHighImpactNewsById } from "../../../apiServices/news";
 import {
   addComments,
-  addReaction,
   checkLikeStatus,
-  checkUserLikeNewsStatus,
+  deleteComments,
   getComments,
   toggleLike,
   toggleLikeComments,
-  deleteComments,
 } from "../../../apiServices/newsEngagement";
-import { getNewsByID } from "../../../apiServices/news";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+import { pinNews, unpinNews } from "../../../apiServices/newsManagement";
 import {
-  getPinnedNews,
-  pinNews,
-  unpinNews,
-} from "../../../apiServices/newsManagement";
-import ImpactLabel from "../../../components/impactLabel/impactLabel";
-import showToast from "../../../utils/showToast";
-import { AxiosError } from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import globalStyles from "../../../assets/styles/globalStyles";
+  CommentIconDark,
+  CommentIconLight,
+  CurrencyImage2,
+  HeartCommentIcon,
+  HeartCommentIconFilled,
+} from "../../../assets/icons/components/headlineDetailsView";
 import { NewsAuthorIcon } from "../../../assets/icons/components/homepage";
-import { Divider } from "react-native-paper";
-import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
-import { getAxiosErrorMessage } from "../../../utils/axiosError";
-import { storage } from "../../../utils/storage";
-import { loadProfileData } from "../../../utils/loadProfileData";
+import { colors } from "../../../assets/styles/colors";
+import fontFamily from "../../../assets/styles/fontFamily";
+import globalStyles from "../../../assets/styles/globalStyles";
+import ClippedSVG from "../../../components/clippedSVG/clippedSVG";
+import Header from "../../../components/header/header";
+import ImpactLabel from "../../../components/impactLabel/impactLabel";
+import Loader from "../../../components/Loader/loader";
+import LoaderOverlay from "../../../components/LoadOverlay/loadOverlayTransparent";
 import ProfileIcon from "../../../components/profileIcon/profileIcon";
+import Tag from "../../../components/tag/tag";
+import { ThemeContext } from "../../../context/themeContext";
+import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
+import { RootStackParamList } from "../../../types/navigation";
+import { getAxiosErrorMessage } from "../../../utils/axiosError";
+import { loadProfileData } from "../../../utils/loadProfileData";
+import showToast from "../../../utils/showToast";
+import { storage } from "../../../utils/storage";
 
 dayjs.extend(relativeTime);
 const { width, height } = Dimensions.get("window");
@@ -160,6 +140,7 @@ const HeadlineDetailsScreen = () => {
   }, [newsId]);
   // News By Id
   const getNewsByIDAPI = async (newsId: string) => {
+    setLoading(true);
     try {
       const response = await getHighImpactNewsById(newsId);
       console.log("newsResponseByID:", response.data);
@@ -246,7 +227,7 @@ const HeadlineDetailsScreen = () => {
             : comment
         )
       );
-      showToast(response.data.message, "success");
+      //showToast(response.data.message, "success");
     } catch (err) {
       const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
@@ -317,7 +298,7 @@ const HeadlineDetailsScreen = () => {
     try {
       const response = await deleteComments(commentId);
       console.log("DeleteCommentResponse=>", response.data);
-      showToast(response.data.message, "success");
+      // showToast(response.data.message, "success");
       getCommentsAPI(newsId ?? "");
     } catch (err) {
       const errorMessage = getAxiosErrorMessage(err);
@@ -358,8 +339,7 @@ const HeadlineDetailsScreen = () => {
         Alert.alert("Error", "An unexpected error occurred");
       });
   };
-  // if (loading) return <Loader />;
-  // if (addCommentsLoader) return <LoaderOverlay visible={true} />;
+
   const titleByLevel =
     userExperienceLevel === "beginner"
       ? newsData.title_by_level?.beginner ?? ""
@@ -422,6 +402,8 @@ const HeadlineDetailsScreen = () => {
   const visibleComments = showAllComments
     ? commentsData
     : commentsData.slice(0, 3);
+  if (loading) return <Loader />;
+  // if (addCommentsLoader) return <LoaderOverlay visible={true} />;
   return (
     <>
       <KeyboardAvoidingView
@@ -458,7 +440,7 @@ const HeadlineDetailsScreen = () => {
                   onToggleLikeClick={handleToggleLike}
                   shareUrl={newsData.url}
                   onToggleBookmarkClick={handleToggleBookmark}
-                  onClickLink={() => handleOpenNewsLink(newsData.url ?? "")}
+                  // onClickLink={() => handleOpenNewsLink(newsData.url ?? "")}
                   showActivityIcons={true}
                 />
               </View>
@@ -625,6 +607,25 @@ const HeadlineDetailsScreen = () => {
                       </Text>
                     </View>
                   ))}
+
+                  <TouchableOpacity
+                    style={styles.viewCommentsContainer}
+                    onPress={() => handleOpenNewsLink(newsData.url ?? "")}
+                  >
+                    <Text
+                      style={[
+                        styles.viewCommentsText,
+                        {
+                          color:
+                            theme === "dark"
+                              ? colors.vigenaryText
+                              : colors.sexdenaryText,
+                        },
+                      ]}
+                    >
+                      Read More
+                    </Text>
+                  </TouchableOpacity>
                 </View>
                 <Divider
                   style={[
@@ -1255,7 +1256,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   viewCommentsContainer: {
-    marginTop: 20,
     paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",

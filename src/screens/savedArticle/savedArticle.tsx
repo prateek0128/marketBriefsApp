@@ -1,39 +1,36 @@
-import React, { useState, useContext, useEffect, useCallback } from "react";
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
+  NavigationProp,
+  useFocusEffect,
+  useNavigation,
+} from "@react-navigation/native";
+import { AxiosError } from "axios";
+import { useCallback, useContext, useEffect, useState } from "react";
+import {
   FlatList,
   RefreshControl,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
   TouchableWithoutFeedback,
+  View,
 } from "react-native";
-import { BackArrow, BackArrowWhite } from "../../assets/icons/components/logIn";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { RootStackParamList } from "../../types/navigation";
-import { Ionicons } from "@expo/vector-icons"; // Make sure you have expo vector icons installed
-import fontFamily from "../../assets/styles/fontFamily";
-import { ThemeContext } from "../../context/themeContext";
-import { colors } from "../../assets/styles/colors";
 import { Divider } from "react-native-paper";
-import globalStyles from "../../assets/styles/globalStyles";
+import { getPinnedNews, unpinNews } from "../../apiServices/newsManagement";
 import { NewsAuthorIcon } from "../../assets/icons/components/homepage";
 import {
   ViewMoreIcon,
   ViewMoreIconWhite,
 } from "../../assets/icons/components/savedArticles";
-import Header from "../../components/header/header";
-import { useBackPressNavigate } from "../../hooks/useBackPressNavigate";
-import { getPinnedNews, unpinNews } from "../../apiServices/newsManagement";
-import { AxiosError } from "axios";
-import showToast from "../../utils/showToast";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useFocusEffect } from "@react-navigation/native";
+import { colors } from "../../assets/styles/colors";
+import fontFamily from "../../assets/styles/fontFamily";
+import globalStyles from "../../assets/styles/globalStyles";
 import EmptyState from "../../components/emptyState/emptyState";
 import Loader from "../../components/Loader/loader";
+import { ThemeContext } from "../../context/themeContext";
+import { useBackPressNavigate } from "../../hooks/useBackPressNavigate";
+import { RootStackParamList } from "../../types/navigation";
+import showToast from "../../utils/showToast";
 import { storage } from "../../utils/storage";
 const SavedArticles = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -253,7 +250,12 @@ const SavedArticles = () => {
     <TouchableWithoutFeedback
       onPress={() => setOpenMenuId(null)} // Close any open menu
     >
-      <SafeAreaView style={[globalStyles.pageContainerWithBackground(theme)]}>
+      <SafeAreaView
+        style={[
+          globalStyles.pageContainerWithBackground(theme),
+          { paddingBottom: 0 },
+        ]}
+      >
         <View style={styles.headerContainer}>
           <View style={styles.arrowSavedContainer}>
             {/* <Header showThemeIcon={true} showBackArrow={false} /> */}

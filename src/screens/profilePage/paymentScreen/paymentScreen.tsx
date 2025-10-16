@@ -1,35 +1,27 @@
-import React, { useState, useEffect, useContext } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  ImageBackground,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
-import fontFamily from "../../../assets/styles/fontFamily";
-import { ThemeContext } from "../../../context/themeContext";
-import { colors } from "../../../assets/styles/colors";
-import { RootStackParamList } from "../../../types/navigation";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
-import {
-  BackArrow,
-  BackArrowWhite,
-} from "../../../assets/icons/components/logIn";
-import Header from "../../../components/header/header";
-import globalStyles from "../../../assets/styles/globalStyles";
-import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
-import { getUserProfile } from "../../../apiServices/user";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { AxiosError } from "axios";
-import showToast from "../../../utils/showToast";
-import Loader from "../../../components/Loader/loader";
-import { PaymentDetailsIcon } from "../../../assets/icons/components/Profile";
+import * as ImagePicker from "expo-image-picker";
+import { useContext, useEffect, useState } from "react";
+import {
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { getUserProfile } from "../../../apiServices/user";
+import { PaymentDetailsIcon } from "../../../assets/icons/components/profile";
+import { colors } from "../../../assets/styles/colors";
+import fontFamily from "../../../assets/styles/fontFamily";
+import globalStyles from "../../../assets/styles/globalStyles";
 import Button from "../../../components/button/button";
+import Header from "../../../components/header/header";
+import Loader from "../../../components/Loader/loader";
+import { ThemeContext } from "../../../context/themeContext";
+import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
+import { RootStackParamList } from "../../../types/navigation";
+import showToast from "../../../utils/showToast";
 type ProfileDetails = {
   name?: string;
   experience_level?: string;

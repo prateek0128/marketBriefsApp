@@ -90,13 +90,16 @@ export const getHighImpactNewsByFilter = async (
 //Get Recommended High-Impact News (Recent)
 export const getRecommendedHighImpactNewsByFilter = async (
   filterDays?: any,
-  selectedTag?: any
+  selectedTag?: any,
+  limit?: any
 ) => {
   const client = await apiClient();
   console.log("Filter Days in API:", filterDays);
   try {
     const response = await client.get(
-      `/news/recommended/high-impact/${filterDays}?category=${selectedTag}`
+      `/news/recommended/high-impact/${filterDays}?category=${selectedTag}?limit=${
+        limit ?? 10
+      }`
     );
     return response;
   } catch (error) {

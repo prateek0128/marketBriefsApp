@@ -14,7 +14,7 @@ import { AuthProvider } from "./src/context/loginAuthContext";
 import { ThemeProvider } from "./src/context/themeContext";
 import ThemeToggleButton from "./src/components/themeToggleButton/themeToggleButton";
 import { ThemeContext } from "./src/context/themeContext";
-import { GoogleAuthProvider } from "./src/context/googleAuthContext";
+// import { GoogleAuthProvider } from "./src/context/googleAuthContext";
 import { GoogleAuthProviderWeb } from "./src/context/googleAuthContextWeb";
 import { FacebookAuthProvider } from "./src/context/facebookAuthContext";
 import { AppleAuthProvider } from "./src/context/appleAuthContext";
@@ -40,40 +40,38 @@ export default function App() {
   return (
     <>
       <PaperProvider>
-        <GoogleAuthProvider>
-          <GoogleAuthProviderWeb>
-            <FacebookAuthProvider>
-              <AppleAuthProvider>
-                <AuthProvider>
-                  <ThemeProvider>
-                    <GestureHandlerRootView style={{ flex: 1 }}>
-                      <SafeAreaProvider>
-                        <ThemedContainer>
-                          <StatusBar
-                            backgroundColor={
-                              theme === "dark"
-                                ? colors.octodenaryText
-                                : colors.primaryBackground
-                            } // Android background color
-                            barStyle={
-                              theme === "dark"
-                                ? "light-content"
-                                : "dark-content"
-                            } // iOS & Android text/icons
-                            // translucent={true}
-                          />
-                          <Navigation />
-                          {/* <ThemeToggleButton /> */}
-                          <FlashMessage position="top" />
-                        </ThemedContainer>
-                      </SafeAreaProvider>
-                    </GestureHandlerRootView>
-                  </ThemeProvider>
-                </AuthProvider>
-              </AppleAuthProvider>
-            </FacebookAuthProvider>
-          </GoogleAuthProviderWeb>
-        </GoogleAuthProvider>
+        {/* <GoogleAuthProvider> */}
+        <GoogleAuthProviderWeb>
+          <FacebookAuthProvider>
+            <AppleAuthProvider>
+              <AuthProvider>
+                <ThemeProvider>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <SafeAreaProvider>
+                      <ThemedContainer>
+                        <StatusBar
+                          backgroundColor={
+                            theme === "dark"
+                              ? colors.octodenaryText
+                              : colors.primaryBackground
+                          } // Android background color
+                          barStyle={
+                            theme === "dark" ? "light-content" : "dark-content"
+                          } // iOS & Android text/icons
+                          // translucent={true}
+                        />
+                        <Navigation />
+                        {/* <ThemeToggleButton /> */}
+                        <FlashMessage position="top" />
+                      </ThemedContainer>
+                    </SafeAreaProvider>
+                  </GestureHandlerRootView>
+                </ThemeProvider>
+              </AuthProvider>
+            </AppleAuthProvider>
+          </FacebookAuthProvider>
+        </GoogleAuthProviderWeb>
+        {/* </GoogleAuthProvider> */}
       </PaperProvider>
     </>
   );

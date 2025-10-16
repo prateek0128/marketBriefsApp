@@ -17,8 +17,12 @@ export type RootStackParamList = {
     path?: string;
   };
   Profile: NavigatorScreenParams<ProfileStackParamList>;
+  Saved?: undefined;
   EditProfileScreen?: undefined;
   AppearanceScreen?: undefined;
+  ContactUsScreen?: undefined;
+  AboutUsScreen?: undefined;
+  AboutAppScreen?: undefined;
 };
 export type BottomTabParamList = {
   Home?: undefined;
@@ -32,9 +36,11 @@ export type HomeStackParamList = {
 };
 
 export type ProfileStackParamList = {
-  Saved?: undefined;
   PaymentScreen?: undefined;
   Profile?: undefined;
   EditProfileScreen?: undefined;
   AppearanceScreen?: undefined;
+  ContactUsScreen?: undefined;
+  AboutUsScreen?: undefined;
+  AboutAppScreen?: undefined;
 };

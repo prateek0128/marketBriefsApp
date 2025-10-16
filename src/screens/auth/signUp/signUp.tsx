@@ -34,7 +34,7 @@ import { ThemeContext } from "../../../context/themeContext";
 import showToast from "../../../utils/showToast";
 import { AxiosError } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useGoogleAuth } from "../../../context/googleAuthContext";
+// import { useGoogleAuth } from "../../../context/googleAuthContext";
 import { useGoogleAuthWeb } from "../../../context/googleAuthContextWeb";
 import { useFacebookAuth } from "../../../context/facebookAuthContext";
 import { useAppleAuth } from "../../../context/appleAuthContext";
@@ -55,10 +55,10 @@ const SignUpScreen = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const otpInputs = useRef<Array<RNTextInput | null>>([]);
   const [isValid, setIsValid] = useState(false);
-  const { googleUserInfo, idToken, accessToken, signIn, signOut } =
-    useGoogleAuth();
-  const { googleAccessTokenWeb, userInfoGoogleWeb, promptGoogleLoginWeb } =
-    useGoogleAuthWeb();
+  // const { googleUserInfo, idToken, accessToken, signIn, signOut } =
+  //   useGoogleAuth();
+  // const { googleAccessTokenWeb, userInfoGoogleWeb, promptGoogleLoginWeb } =
+  //   useGoogleAuthWeb();
   const { facebookAccessToken, userInfoFacebook, promptFacebookLogin } =
     useFacebookAuth();
   const { userInfoApple, promptAppleLogin } = useAppleAuth();
@@ -150,31 +150,31 @@ const SignUpScreen = () => {
     setShowOTPInputs(false);
     setOtp(["", "", "", "", "", ""]);
   };
-  const handleGoogleLogin = async () => {
-    console.log("Idtoken", idToken);
-    console.log("AccessToken", accessToken);
-    const userData = await signIn();
-    console.log("UserData from Google SignIn", userData);
-    if (userData) {
-      const userGoogleProfile = userData.user.photo;
-      await storage.setItem("userGoogleProfile", userGoogleProfile ?? "");
-      saveGoogleData(userData.idToken ?? "", userData);
-    }
-  };
-  const handleGoogleLoginWeb = async () => {
-    await promptGoogleLoginWeb();
-    if (userInfoGoogleWeb && googleAccessTokenWeb?.accessToken) {
-      console.log("GoogleToken:", googleAccessTokenWeb);
-      console.log("GoogleAccessToken:", googleAccessTokenWeb.accessToken);
-      console.log("GoogleIDToken:", googleAccessTokenWeb.idToken);
-      console.log("LoggedInUser:", userInfoGoogleWeb);
-      saveGoogleData(googleAccessTokenWeb.accessToken ?? "", userInfoGoogleWeb);
-      // navigation.navigate("TellUsSomething", {
-      //   // name: userInfoGoogleWeb.name,
-      //   // email: userInfoGoogleWeb.email,
-      // });
-    }
-  };
+  // const handleGoogleLogin = async () => {
+  //   console.log("Idtoken", idToken);
+  //   console.log("AccessToken", accessToken);
+  //   const userData = await signIn();
+  //   console.log("UserData from Google SignIn", userData);
+  //   if (userData) {
+  //     const userGoogleProfile = userData.user.photo;
+  //     await storage.setItem("userGoogleProfile", userGoogleProfile ?? "");
+  //     saveGoogleData(userData.idToken ?? "", userData);
+  //   }
+  // };
+  // const handleGoogleLoginWeb = async () => {
+  //   await promptGoogleLoginWeb();
+  //   if (userInfoGoogleWeb && googleAccessTokenWeb?.accessToken) {
+  //     console.log("GoogleToken:", googleAccessTokenWeb);
+  //     console.log("GoogleAccessToken:", googleAccessTokenWeb.accessToken);
+  //     console.log("GoogleIDToken:", googleAccessTokenWeb.idToken);
+  //     console.log("LoggedInUser:", userInfoGoogleWeb);
+  //     saveGoogleData(googleAccessTokenWeb.accessToken ?? "", userInfoGoogleWeb);
+  //     // navigation.navigate("TellUsSomething", {
+  //     //   // name: userInfoGoogleWeb.name,
+  //     //   // email: userInfoGoogleWeb.email,
+  //     // });
+  //   }
+  // };
   const saveGoogleData = async (token: string, userData: any) => {
     const signinData = {
       google_token: token,
@@ -299,7 +299,7 @@ const SignUpScreen = () => {
               text="Continue with Apple"
               onPress={promptAppleLogin}
             />
-            <SocialLoginButton
+            {/* <SocialLoginButton
               IconComponent={GoogleIcon}
               text="Continue with Google"
               //onPress={promptGoogleLogin}
@@ -309,7 +309,7 @@ const SignUpScreen = () => {
                   : handleGoogleLogin();
               }}
               // disabled={!requestGoogle}
-            />
+            /> */}
             {/* <SocialLoginButton
               IconComponent={FacebookIcon}
               text="Continue with Facebook"

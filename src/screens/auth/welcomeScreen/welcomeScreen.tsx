@@ -32,7 +32,7 @@ import {
 } from "../../../assets/icons/components/welcome";
 import { ThemeContext } from "../../../context/themeContext";
 import * as WebBrowser from "expo-web-browser";
-import { useGoogleAuth } from "../../../context/googleAuthContext";
+// import { useGoogleAuth } from "../../../context/googleAuthContext";
 import { useGoogleAuthWeb } from "../../../context/googleAuthContextWeb";
 import { useFacebookAuth } from "../../../context/facebookAuthContext";
 import { useAppleAuth } from "../../../context/appleAuthContext";
@@ -49,40 +49,40 @@ const WelcomeScreen = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { setLoginState } = useContext(AuthContext);
-  const { googleAccessTokenWeb, userInfoGoogleWeb, promptGoogleLoginWeb } =
-    useGoogleAuthWeb();
-  const { googleUserInfo, idToken, accessToken, signIn, signOut } =
-    useGoogleAuth();
+  // const { googleAccessTokenWeb, userInfoGoogleWeb, promptGoogleLoginWeb } =
+  //   useGoogleAuthWeb();
+  // const { googleUserInfo, idToken, accessToken, signIn, signOut } =
+  //   useGoogleAuth();
   const { facebookAccessToken, userInfoFacebook, promptFacebookLogin } =
     useFacebookAuth();
   const { userInfoApple, promptAppleLogin } = useAppleAuth();
-  const handleGoogleLogin = async () => {
-    console.log("Idtoken", idToken);
-    console.log("AccessToken", accessToken);
-    const userData = await signIn();
-    console.log("UserData from Google SignIn", userData);
-    if (userData) {
-      const userGoogleProfile = userData.user.photo;
-      await storage.setItem("userGoogleProfile", userGoogleProfile ?? "");
-      saveGoogleData(userData.idToken ?? "", userData);
-      //await saveGoogleData(userData.idToken ?? "", userData, navigation);
-    }
-  };
-  const handleGoogleLoginWeb = async () => {
-    await promptGoogleLoginWeb();
-    if (userInfoGoogleWeb && googleAccessTokenWeb?.accessToken) {
-      console.log("GoogleToken:", googleAccessTokenWeb);
-      console.log("GoogleAccessToken:", googleAccessTokenWeb.accessToken);
-      console.log("GoogleIDToken:", googleAccessTokenWeb.idToken);
-      console.log("LoggedInUser:", userInfoGoogleWeb);
-      saveGoogleData(googleAccessTokenWeb.accessToken ?? "", userInfoGoogleWeb);
-      // await saveGoogleData(
-      //   googleAccessTokenWeb.idToken ?? "",
-      //   userInfoGoogleWeb,
-      //   navigation
-      // );
-    }
-  };
+  // const handleGoogleLogin = async () => {
+  //   console.log("Idtoken", idToken);
+  //   console.log("AccessToken", accessToken);
+  //   const userData = await signIn();
+  //   console.log("UserData from Google SignIn", userData);
+  //   if (userData) {
+  //     const userGoogleProfile = userData.user.photo;
+  //     await storage.setItem("userGoogleProfile", userGoogleProfile ?? "");
+  //     saveGoogleData(userData.idToken ?? "", userData);
+  //     //await saveGoogleData(userData.idToken ?? "", userData, navigation);
+  //   }
+  // };
+  // const handleGoogleLoginWeb = async () => {
+  //   await promptGoogleLoginWeb();
+  //   if (userInfoGoogleWeb && googleAccessTokenWeb?.accessToken) {
+  //     console.log("GoogleToken:", googleAccessTokenWeb);
+  //     console.log("GoogleAccessToken:", googleAccessTokenWeb.accessToken);
+  //     console.log("GoogleIDToken:", googleAccessTokenWeb.idToken);
+  //     console.log("LoggedInUser:", userInfoGoogleWeb);
+  //     saveGoogleData(googleAccessTokenWeb.accessToken ?? "", userInfoGoogleWeb);
+  //     // await saveGoogleData(
+  //     //   googleAccessTokenWeb.idToken ?? "",
+  //     //   userInfoGoogleWeb,
+  //     //   navigation
+  //     // );
+  //   }
+  // };
   const googleData = {
     data: {
       access_token:
@@ -191,17 +191,17 @@ const WelcomeScreen = () => {
             text="Continue with Apple"
             onPress={promptAppleLogin}
           />
-          <SocialLoginButton
+          {/* <SocialLoginButton
             IconComponent={GoogleIcon}
             text="Continue with Google"
             //onPress={promptGoogleLogin}
             onPress={() => {
               Platform.OS == "web"
-                ? handleGoogleLoginWeb()
+                ? handleGoogleLoginWeb()-
                 : handleGoogleLogin();
             }}
             // disabled={!requestGoogle}
-          />
+          /> */}
           {/* <SocialLoginButton
             IconComponent={FacebookIcon}
             text="Continue with Facebook"

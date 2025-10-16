@@ -22,6 +22,17 @@ export const updateUserProfile = async () => {
   }
 };
 
+// Delete User Profile
+export const deleteUserProfile = async () => {
+  const client = await apiClient();
+  try {
+    const response = await client.put("/user/profile");
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Update User Interest
 export const updateUserInterest = async (interestsData: any) => {
   const client = await apiClient();
