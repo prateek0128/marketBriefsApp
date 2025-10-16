@@ -3,7 +3,6 @@ import {
   useFocusEffect,
   useNavigation,
 } from "@react-navigation/native";
-import { AxiosError } from "axios";
 import { useCallback, useContext, useEffect, useState } from "react";
 import {
   FlatList,
@@ -30,6 +29,7 @@ import Loader from "../../components/Loader/loader";
 import { ThemeContext } from "../../context/themeContext";
 import { useBackPressNavigate } from "../../hooks/useBackPressNavigate";
 import { RootStackParamList } from "../../types/navigation";
+import { getAxiosErrorMessage } from "../../utils/axiosError";
 import showToast from "../../utils/showToast";
 import { storage } from "../../utils/storage";
 const SavedArticles = () => {
@@ -57,13 +57,7 @@ const SavedArticles = () => {
       // setSavedNews(response.data);
       setSavedNews(response.data.map((entry: any) => entry.news));
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     } finally {
       setLoading(false);
@@ -92,14 +86,7 @@ const SavedArticles = () => {
       // Refresh the list automatically
       await getBookmarkAPI();
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
-      console.log("ErrorMessageUninNews", axiosErr.response);
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     }
   };

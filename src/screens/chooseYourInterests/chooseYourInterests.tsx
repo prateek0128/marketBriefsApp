@@ -1,36 +1,34 @@
-import React, { useState, useContext, useEffect } from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { ThemeContext } from "../../context/themeContext";
-import { showMessage } from "react-native-flash-message";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
+import * as Device from "expo-device";
+import * as Localization from "expo-localization";
+import { useContext, useEffect, useState } from "react";
+import {
   Dimensions,
-  Alert,
-  ToastAndroid,
-  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { colors } from "../../assets/styles/colors";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
-import { RootStackParamList } from "../../types/navigation";
-import fontFamily from "../../assets/styles/fontFamily";
 import { ScrollView } from "react-native-gesture-handler";
-import showToast from "../../utils/showToast";
-import Button from "../../components/button/button";
-import globalStyles from "../../assets/styles/globalStyles";
 import {
   getAllInterests,
   submitOnboarding,
 } from "../../apiServices/onboarding";
-import { AxiosError } from "axios";
-import { RouteProp, useRoute } from "@react-navigation/native";
-import * as Device from "expo-device";
-import * as Localization from "expo-localization";
 import { getUserProfile, updateUserInterest } from "../../apiServices/user";
-import Loader from "../../components/Loader/loader";
+import { colors } from "../../assets/styles/colors";
+import fontFamily from "../../assets/styles/fontFamily";
+import globalStyles from "../../assets/styles/globalStyles";
+import Button from "../../components/button/button";
+import { ThemeContext } from "../../context/themeContext";
 import { useBackPressNavigate } from "../../hooks/useBackPressNavigate";
+import { RootStackParamList } from "../../types/navigation";
+import { getAxiosErrorMessage } from "../../utils/axiosError";
+import showToast from "../../utils/showToast";
 const interests = [
   "Stock Market News",
   "Indian Companies",
@@ -110,13 +108,7 @@ export default function ChooseYourInterests() {
       showToast(response.data.message, "success");
       navigation.navigate("BottomTabNavigator");
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
       return;
     }
@@ -128,13 +120,7 @@ export default function ChooseYourInterests() {
       console.log("InterestsResponse=>", response.data.data);
       setInterests(response.data.data);
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     } finally {
       setIsLoading(false);
@@ -153,13 +139,7 @@ export default function ChooseYourInterests() {
         setIsFirstTime(false);
       }
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     } finally {
       setIsLoading(false);
@@ -172,14 +152,7 @@ export default function ChooseYourInterests() {
       const response = await updateUserInterest(interestsData);
       console.log("UpdateRespone=>", response.data);
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
-      console.log("ErrorUpdateInterestMessage=>", errorMessage);
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
       return;
     }

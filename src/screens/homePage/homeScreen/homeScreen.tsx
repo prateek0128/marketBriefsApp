@@ -1,46 +1,37 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useContext,
-  useCallback,
-} from "react";
-import { BackHandler, Alert } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
+  NavigationProp,
+  useFocusEffect,
+  useNavigation,
+} from "@react-navigation/native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  BackHandler,
   Dimensions,
   FlatList,
-  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
-import { colors } from "../../../assets/styles/colors";
-import EmptyState from "../../../components/emptyState/emptyState";
-import HeadlineDetailCard from "../../../components/headlineDetailedCard/headlineDetailedCard";
-import { RootStackParamList } from "../../../types/navigation";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
-import fontFamily from "../../../assets/styles/fontFamily";
-import axios, { AxiosError } from "axios";
-import {
-  getHighImpactNews,
-  getHighImpactNewsByFilter,
-  getNewsFeed,
-  getRecommendedHighImpactNewsByFilter,
-} from "../../../apiServices/news";
-import Loader from "../../../components/Loader/loader";
-import { ProfileIcon } from "../../../assets/icons/components/homepage";
-import { GraphImage2 } from "../../../assets/icons/components/headlineDetailsView";
-import { ThemeContext } from "../../../context/themeContext";
-import DiscoverDetailsCard from "../../../components/discoverDetailsCard/discoverDetailsCard";
-import TabLabel from "../../../components/tabLabel/tabLabel";
-import showToast from "../../../utils/showToast";
-import globalStyles from "../../../assets/styles/globalStyles";
 import { Divider } from "react-native-paper";
+import { getRecommendedHighImpactNewsByFilter } from "../../../apiServices/news";
 import { getUserProfile } from "../../../apiServices/user";
+import { GraphImage2 } from "../../../assets/icons/components/headlineDetailsView";
+import { ProfileIcon } from "../../../assets/icons/components/homepage";
+import { colors } from "../../../assets/styles/colors";
+import fontFamily from "../../../assets/styles/fontFamily";
+import globalStyles from "../../../assets/styles/globalStyles";
+import DiscoverDetailsCard from "../../../components/discoverDetailsCard/discoverDetailsCard";
+import EmptyState from "../../../components/emptyState/emptyState";
 import FilterBar from "../../../components/filterBar/filterBar";
+import Loader from "../../../components/Loader/loader";
+import TabLabel from "../../../components/tabLabel/tabLabel";
+import { ThemeContext } from "../../../context/themeContext";
+import { RootStackParamList } from "../../../types/navigation";
+import { getAxiosErrorMessage } from "../../../utils/axiosError";
+import showToast from "../../../utils/showToast";
 import { storage } from "../../../utils/storage";
 const { width, height } = Dimensions.get("window");
 type NewsItem = {
@@ -107,13 +98,7 @@ const HomeScreen = () => {
       setUserExperienceLevel(profileData.experience_level || "");
       setSavedInterests(profileData.interests || []);
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     }
   };
@@ -145,13 +130,7 @@ const HomeScreen = () => {
         setAllNewsData(newsData);
       }
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     } finally {
       if (!isRefresh) setLoading(false);
@@ -194,13 +173,7 @@ const HomeScreen = () => {
         setAllNewsData(filteredNewsData);
       }
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     } finally {
       setLoading(false);
