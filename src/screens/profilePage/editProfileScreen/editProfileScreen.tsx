@@ -1,35 +1,34 @@
-import React, { useState, useEffect, useContext } from "react";
 import {
-  View,
+  CommonActions,
+  NavigationProp,
+  useNavigation,
+} from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
+import { useContext, useEffect, useState } from "react";
+import {
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
-import fontFamily from "../../../assets/styles/fontFamily";
-import { ThemeContext } from "../../../context/themeContext";
+import { deleteUserProfile } from "../../../apiServices/user";
 import { colors } from "../../../assets/styles/colors";
-import { RootStackParamList } from "../../../types/navigation";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
-import {
-  BackArrow,
-  BackArrowWhite,
-} from "../../../assets/icons/components/logIn";
-import Header from "../../../components/header/header";
+import fontFamily from "../../../assets/styles/fontFamily";
 import globalStyles from "../../../assets/styles/globalStyles";
-import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
-import { getUserProfile } from "../../../apiServices/user";
-import { AxiosError } from "axios";
-import showToast from "../../../utils/showToast";
+import Header from "../../../components/header/header";
 import Loader from "../../../components/Loader/loader";
-import { loadProfileData } from "../../../utils/loadProfileData";
-import ProfileIcon from "../../../components/profileIcon/profileIcon";
 import ProfileAvatar from "../../../components/profileAvatar/profileAvatar";
+import { AuthContext } from "../../../context/loginAuthContext";
+import { ThemeContext } from "../../../context/themeContext";
+import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
+import { RootStackParamList } from "../../../types/navigation";
+import { getAxiosErrorMessage } from "../../../utils/axiosError";
+import { loadProfileData } from "../../../utils/loadProfileData";
+import showToast from "../../../utils/showToast";
 type ProfileDetails = {
   name?: string;
   experience_level?: string;
@@ -39,6 +38,7 @@ type ProfileDetails = {
 export default function EditProfileScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { theme } = useContext(ThemeContext);
+  const { user, logout } = useContext(AuthContext);
   const [userName, setUserName] = useState("--");
   const [userEmail, setUserEmail] = useState("--");
   const [userProfile, setUserProfile] = useState("");
@@ -48,9 +48,9 @@ export default function EditProfileScreen() {
   );
   const [saving, setSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
   const [profileDetails, setProfileDetails] = useState<ProfileDetails>({});
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   // Handle Image Selection
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -78,6 +78,16 @@ export default function EditProfileScreen() {
       alert("Profile updated successfully!");
     }, 1500);
   };
+  const handleLogout = () => {
+    console.log("Logged out");
+    logout();
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: "Welcome" }],
+      })
+    );
+  };
   useEffect(() => {
     const fetchProfile = async () => {
       const { name, email, profile, experienceLevel } = await loadProfileData();
@@ -95,6 +105,21 @@ export default function EditProfileScreen() {
   const capitalizeFirstLetter = (text: string | undefined) => {
     if (!text) return "";
     return text.charAt(0).toUpperCase() + text.slice(1);
+  };
+  const handelDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await deleteUserProfile();
+      console.log("DeleteUser=>", response.data);
+      setShowDeleteModal(false);
+      //showToast(errorMessage, "danger");
+      handleLogout();
+    } catch (err) {
+      const errorMessage = getAxiosErrorMessage(err);
+      showToast(errorMessage, "danger");
+    } finally {
+      setIsDeleting(false);
+    }
   };
   if (isLoading) return <Loader />;
 
@@ -313,6 +338,98 @@ export default function EditProfileScreen() {
           )}
         </TouchableOpacity>
       </View> */}
+      <View style={styles.logoutContainer}>
+        <TouchableOpacity
+          onPress={() => setShowDeleteModal(true)}
+          style={styles.logoutButton}
+        >
+          <Text
+            style={[
+              styles.logoutText,
+              {
+                color: colors.quaternaryButtonColor,
+              },
+            ]}
+          >
+            Delete Account
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <Modal
+        transparent
+        visible={showDeleteModal}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View
+            style={[
+              styles.modalContainer,
+              {
+                backgroundColor:
+                  theme === "dark"
+                    ? colors.darkPrimaryBackground
+                    : colors.primaryBackground,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.modalTitle,
+                {
+                  color:
+                    theme === "dark"
+                      ? colors.darkPrimaryText
+                      : colors.octodenaryText,
+                },
+              ]}
+            >
+              Delete Account?
+            </Text>
+            <Text
+              style={[
+                styles.modalMessage,
+                {
+                  color:
+                    theme === "dark"
+                      ? colors.darkSenaryText
+                      : colors.novemdenaryText,
+                },
+              ]}
+            >
+              Are you sure you want to permanently delete your account? This
+              action cannot be undone.
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.cancelButton]}
+                onPress={() => setShowDeleteModal(false)}
+              >
+                <Text style={[styles.cancelText]}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.deleteButton,
+                  {
+                    backgroundColor:
+                      theme === "dark"
+                        ? colors.vigenaryText
+                        : colors.sexdenaryText,
+                  },
+                ]}
+                onPress={handelDeleteAccount}
+                disabled={isDeleting}
+              >
+                <Text style={[styles.deleteText]}>
+                  {isDeleting ? "Deleting..." : "Delete"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -395,5 +512,72 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  logoutContainer: {
+    // position: "absolute",
+    // bottom: 20,
+    // left: 0,
+    // right: 0,
+    alignItems: "center",
+  },
+  logoutButton: {
+    alignItems: "center",
+    position: "absolute",
+    bottom: 0,
+  },
+  logoutText: {
+    fontFamily: fontFamily.Inter400,
+    fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "80%",
+    borderRadius: 16,
+    padding: 20,
+    elevation: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: fontFamily.Cabinet700,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  modalMessage: {
+    fontSize: 14,
+    fontFamily: fontFamily.Satoshi500,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 10,
+    marginRight: 10,
+    borderRadius: 10,
+    backgroundColor: "#ccc",
+    alignItems: "center",
+  },
+  deleteButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "#E53935",
+    alignItems: "center",
+  },
+  cancelText: {
+    color: colors.black,
+    fontFamily: fontFamily.Cabinet700,
+  },
+  deleteText: {
+    color: colors.white,
+    fontFamily: fontFamily.Cabinet700,
   },
 });

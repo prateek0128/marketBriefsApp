@@ -1,4 +1,4 @@
-import { StyleSheet, TextStyle } from "react-native";
+import { TextStyle } from "react-native";
 import { colors } from "./colors";
 import fontFamily from "./fontFamily";
 
@@ -7,7 +7,9 @@ const globalStyles = {
     flex: 1,
     backgroundColor:
       theme === "dark" ? colors.octodenaryText : colors.primaryBackground,
-    padding: 24,
+    paddingHorizontal: 24,
+    paddingTop: 48,
+    paddingBottom: 24,
   }),
   title: (theme: string): TextStyle => ({
     fontFamily: fontFamily.Inter700,

@@ -1,46 +1,37 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useContext,
-  useCallback,
-} from "react";
-import { BackHandler, Alert } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
+  NavigationProp,
+  useFocusEffect,
+  useNavigation,
+} from "@react-navigation/native";
+import React, { useCallback, useContext, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  BackHandler,
   Dimensions,
   FlatList,
-  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
-import { colors } from "../../../assets/styles/colors";
-import EmptyState from "../../../components/emptyState/emptyState";
-import HeadlineDetailCard from "../../../components/headlineDetailedCard/headlineDetailedCard";
-import { RootStackParamList } from "../../../types/navigation";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
-import fontFamily from "../../../assets/styles/fontFamily";
-import axios, { AxiosError } from "axios";
-import {
-  getHighImpactNews,
-  getHighImpactNewsByFilter,
-  getNewsFeed,
-  getRecommendedHighImpactNewsByFilter,
-} from "../../../apiServices/news";
-import Loader from "../../../components/Loader/loader";
-import { ProfileIcon } from "../../../assets/icons/components/homepage";
-import { GraphImage2 } from "../../../assets/icons/components/headlineDetailsView";
-import { ThemeContext } from "../../../context/themeContext";
-import DiscoverDetailsCard from "../../../components/discoverDetailsCard/discoverDetailsCard";
-import TabLabel from "../../../components/tabLabel/tabLabel";
-import showToast from "../../../utils/showToast";
-import globalStyles from "../../../assets/styles/globalStyles";
 import { Divider } from "react-native-paper";
+import { getRecommendedHighImpactNewsByFilter } from "../../../apiServices/news";
 import { getUserProfile } from "../../../apiServices/user";
+import { GraphImage2 } from "../../../assets/icons/components/headlineDetailsView";
+import { ProfileIcon } from "../../../assets/icons/components/homepage";
+import { colors } from "../../../assets/styles/colors";
+import fontFamily from "../../../assets/styles/fontFamily";
+import globalStyles from "../../../assets/styles/globalStyles";
+import DiscoverDetailsCard from "../../../components/discoverDetailsCard/discoverDetailsCard";
+import EmptyState from "../../../components/emptyState/emptyState";
 import FilterBar from "../../../components/filterBar/filterBar";
+import Loader from "../../../components/Loader/loader";
+import TabLabel from "../../../components/tabLabel/tabLabel";
+import { ThemeContext } from "../../../context/themeContext";
+import { RootStackParamList } from "../../../types/navigation";
+import { getAxiosErrorMessage } from "../../../utils/axiosError";
+import showToast from "../../../utils/showToast";
 import { storage } from "../../../utils/storage";
 const { width, height } = Dimensions.get("window");
 type NewsItem = {
@@ -107,13 +98,7 @@ const HomeScreen = () => {
       setUserExperienceLevel(profileData.experience_level || "");
       setSavedInterests(profileData.interests || []);
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     }
   };
@@ -131,7 +116,11 @@ const HomeScreen = () => {
     const activeTag = selectedTag === "All" ? "" : selectedTag;
     try {
       // const response = await getHighImpactNews(activeTag, limit ?? 10);
-      const response = await getRecommendedHighImpactNewsByFilter(filterValue);
+      const response = await getRecommendedHighImpactNewsByFilter(
+        filterValue,
+        activeTag,
+        limit ?? 10
+      );
       //console.log("ALLNewsResponse:", JSON.stringify(response.data, null, 2));
       const newsData = response.data.data;
       console.log("newsResponse:", newsData);
@@ -141,13 +130,7 @@ const HomeScreen = () => {
         setAllNewsData(newsData);
       }
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     } finally {
       if (!isRefresh) setLoading(false);
@@ -171,7 +154,11 @@ const HomeScreen = () => {
     }
     const activeTag = selectedTag === "All" ? "" : selectedTag;
     try {
-      const response = await getRecommendedHighImpactNewsByFilter(filter);
+      const response = await getRecommendedHighImpactNewsByFilter(
+        filter,
+        activeTag,
+        limitValue
+      );
       console.log(
         "Filtered News Response:",
         JSON.stringify(response.data, null, 2)
@@ -186,13 +173,7 @@ const HomeScreen = () => {
         setAllNewsData(filteredNewsData);
       }
     } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
+      const errorMessage = getAxiosErrorMessage(err);
       showToast(errorMessage, "danger");
     } finally {
       setLoading(false);
@@ -300,7 +281,6 @@ const HomeScreen = () => {
     return timeA - timeB; // ascending (oldest first)
     // return timeB - timeA; // descending (newest first)
   });
-  console.log("SortedData:", sortedData.length);
   const allTags = [
     "All",
     "Stocks",
@@ -309,9 +289,28 @@ const HomeScreen = () => {
     "Crypto",
     "Economy",
   ];
+  // Filter logic to show only tags in "interests" (plus "All" and selectedTag)
+  const visibleTags = [
+    // Always show the selected tag first (if any)
+    ...allTags.filter((tag) => tag === selectedTag),
+
+    // Show "All" if it’s not already selected
+    ...allTags.filter((tag) => tag === "All" && tag !== selectedTag),
+
+    // Show interests that are in allTags and not already added
+    ...allTags.filter(
+      (tag) =>
+        savedInterests.includes(tag) && tag !== selectedTag && tag !== "All"
+    ),
+  ];
   if (loading && !refreshing) return <Loader />;
   return (
-    <View style={[globalStyles.pageContainerWithBackground(theme)]}>
+    <View
+      style={[
+        globalStyles.pageContainerWithBackground(theme),
+        { paddingBottom: 0 },
+      ]}
+    >
       <View style={styles.headingContainer}>
         <View style={styles.headingThemeContainer}>
           <View style={styles.userHeadingContainer}>
@@ -370,24 +369,7 @@ const HomeScreen = () => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.tabLabelContainer}
         >
-          {[
-            // first: selectedTag (to always show first if present)
-            ...allTags.filter((tag) => tag === selectedTag),
-
-            // then: "All" and user saved interests (excluding the one already added above)
-            ...allTags.filter(
-              (tag) =>
-                (tag === "All" || savedInterests.includes(tag)) &&
-                tag !== selectedTag
-            ),
-
-            // finally: the rest of the tags (not selected and not in saved interests)
-            ...allTags.filter(
-              (tag) =>
-                tag !== selectedTag &&
-                !(tag === "All" || savedInterests.includes(tag))
-            ),
-          ].map((tag) => (
+          {visibleTags.map((tag) => (
             <TabLabel
               key={tag}
               label={tag}
@@ -471,12 +453,6 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    flex: 1,
-    //flexGrow: 1,
-    backgroundColor: colors.nonaryBackground,
-  },
   headingContainer: {
     marginTop: 0,
     marginBottom: 20,

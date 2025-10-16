@@ -1,39 +1,29 @@
 // components/HeadlineDetailCard.js
 
 import React, { useContext, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Dimensions,
-  TouchableOpacity,
-} from "react-native";
+import { Dimensions, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemeContext } from "../../context/themeContext";
 
 import {
-  BackArrowIcon,
-  BackArrowIconWhite,
   BackArrowDetailsDark,
   BackArrowDetailsLight,
   ShareIcon,
   ShareIconWhite,
 } from "../../assets/icons/components/header";
 
-import { colors } from "../../assets/styles/colors";
-import fontFamily from "../../assets/styles/fontFamily";
 import {
-  LikePostIconFilled,
-  LikePostIcon,
   BookmarkIcon,
   BookmarkIconFilled,
   BookmarkIconFilledWhite,
   BookmarkIconWhite,
+  LikePostIcon,
+  LikePostIconFilled,
   LikePostIconFilledWhite,
   LikePostIconWhite,
 } from "../../assets/icons/components/headlineDetailsView";
-import ShareSheet from "../sharedSheet/sharedSheet";
 import { BackArrow, BackArrowWhite } from "../../assets/icons/components/logIn";
-import Feather from "@expo/vector-icons/Feather";
+import { colors } from "../../assets/styles/colors";
+import ShareSheet from "../sharedSheet/sharedSheet";
 
 const { width } = Dimensions.get("window");
 type HeaderProps = {
@@ -163,7 +153,7 @@ const Header = ({
           >
             {theme === "light" ? <ShareIcon /> : <ShareIconWhite />}
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={onClickLink}
             style={[
               styles.leftHeaderPart,
@@ -180,7 +170,7 @@ const Header = ({
             ) : (
               <Feather name="external-link" size={24} color="white" />
             )}
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       )}
       {/* {showThemeIcon && (

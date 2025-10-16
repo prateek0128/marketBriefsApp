@@ -1,412 +1,468 @@
-import React, { useState, useEffect, useContext } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
+  CommonActions,
+  NavigationProp,
+  useNavigation,
+} from "@react-navigation/native";
+import React, { useContext, useEffect, useState } from "react";
+import {
   Image,
-  StyleSheet,
+  Linking,
+  SafeAreaView,
   ScrollView,
-  ActivityIndicator,
-  ImageBackground,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import * as ImagePicker from "expo-image-picker";
-import fontFamily from "../../../assets/styles/fontFamily";
-import { ThemeContext } from "../../../context/themeContext";
-import { colors } from "../../../assets/styles/colors";
-import { RootStackParamList } from "../../../types/navigation";
-import { useNavigation, NavigationProp } from "@react-navigation/native";
 import {
-  BackArrow,
-  BackArrowWhite,
-} from "../../../assets/icons/components/logIn";
-import Header from "../../../components/header/header";
+  AboutUsDarkIcon,
+  AboutUsLightIcon,
+  AppearenceIconBlack,
+  AppearenceIconWhite,
+  ContactUsDarkIcon,
+  ContactUsLightIcon,
+  DarkProfileIcon,
+  EditProfileIcon,
+  ForwardIcon,
+  PrivacyDarkIcon,
+  PrivacyLightIcon,
+  TermsDarkIcon,
+  TermsLightIcon,
+} from "../../../assets/icons/components/profile";
+import { colors } from "../../../assets/styles/colors";
+import fontFamily from "../../../assets/styles/fontFamily";
 import globalStyles from "../../../assets/styles/globalStyles";
+import Header from "../../../components/header/header";
+import ProfileAvatar from "../../../components/profileAvatar/profileAvatar";
+import { AuthContext } from "../../../context/loginAuthContext";
+import { ThemeContext } from "../../../context/themeContext";
 import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
-import { getUserProfile } from "../../../apiServices/user";
-import { AxiosError } from "axios";
-import showToast from "../../../utils/showToast";
-import Loader from "../../../components/Loader/loader";
-import { PaymentDetailsIcon } from "../../../assets/icons/components/Profile";
-import Button from "../../../components/button/button";
-type ProfileDetails = {
-  name?: string;
-  experience_level?: string;
-  email?: string;
-  // add other properties as needed
+import { RootStackParamList } from "../../../types/navigation";
+import { loadProfileData } from "../../../utils/loadProfileData";
+type OptionItem = {
+  label: string;
+  darkIcon: React.ReactNode;
+  lightIcon: React.ReactNode;
+  onPress: () => void;
 };
-export default function PaymentScreen() {
+
+const ProfileScreen = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { theme } = useContext(ThemeContext);
-  const [fullName, setFullName] = useState("");
-  const [dob, setDob] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [avatar, setAvatar] = useState(
-    "https://randomuser.me/api/portraits/men/32.jpg"
-  );
-  const [saving, setSaving] = useState(false);
-  const [expertiseLevel, setExpertiseLevel] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [profileDetails, setProfileDetails] = useState<ProfileDetails>({});
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  const plans = [
+  const { user, logout } = useContext(AuthContext);
+  const [userName, setUserName] = useState("--");
+  const [userEmail, setUserEmail] = useState("--");
+  const [userProfile, setUserProfile] = useState("");
+
+  const handleLogout = () => {
+    console.log("Logged out");
+    logout();
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: "Welcome" }],
+      })
+    );
+  };
+  const accountOptions: OptionItem[] = [
     {
-      id: "free",
-      title: "Free",
-      price: 0,
-      features: ["Daily 3 articles", "Limited Features"],
-      button: { title: "Current Plan", variant: "outlined" },
-      note: null,
-      popular: false,
-      backgroundImage: null,
+      label: "Account Settings",
+      darkIcon: <DarkProfileIcon />,
+      lightIcon: <EditProfileIcon />,
+      onPress: () => navigation.navigate("EditProfileScreen"),
     },
+    // {
+    //   label: "Delete Account",
+    //   darkIcon: <AppearenceIconWhite />,
+    //   lightIcon: <AppearenceIconBlack />,
+    //   onPress: () => setShowDeleteModal(true),
+    // },
+  ];
+  const supportOptions: OptionItem[] = [
+    // {
+    //   label: "Help",
+    //   darkIcon: <DarkHelp />,
+    //   lightIcon: <HelpIcon />,
+    //   onPress: () => {},
+    // },
     {
-      id: "premium",
-      title: "Premium",
-      price: 9,
-      features: [
-        "Unlimited Articles",
-        "Priority Support",
-        "Ad-free Experience",
-      ],
-      button: { title: "Upgrade for ₹9/mo", variant: "contained" },
-      note: "Secure Payment, Cancel anytime no hidden fees.",
-      popular: true,
-      backgroundImage: require("../../../assets/images/paymentImageLight.png"),
+      label: "Contact Us",
+      darkIcon: <ContactUsDarkIcon />,
+      lightIcon: <ContactUsLightIcon />,
+      onPress: () => navigation.navigate("ContactUsScreen"),
     },
   ];
-  // Handle Image Selection
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-    if (!result.canceled) {
-      setAvatar(result.assets[0].uri);
-    }
-  };
-  // Handle Save Changes
-  const handleSave = () => {
-    setSaving(true);
-    // Mock API save
-    setTimeout(() => {
-      console.log("Saved:", { fullName, dob, email, password, avatar });
-      setSaving(false);
-      alert("Profile updated successfully!");
-    }, 1500);
-  };
-  const getUserProfileAPI = async () => {
-    setIsLoading(true);
-    try {
-      const response = await getUserProfile();
-      console.log(" ProfileResponse=>", response.data);
-      setProfileDetails(response.data || []);
-    } catch (err) {
-      // Narrow / cast to AxiosError
-      const axiosErr = err as AxiosError<{
-        status: string;
-        message: string;
-      }>;
-      const errorMessage =
-        axiosErr.response?.data?.message ?? "Something went wrong";
-      showToast(errorMessage, "danger");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const legalOptions: OptionItem[] = [
+    {
+      label: "Privacy Policy",
+      darkIcon: <PrivacyDarkIcon />,
+      lightIcon: <PrivacyLightIcon />,
+      onPress: () => {
+        Linking.openURL("https://marketbriefs.co.in/privacypolicy").catch(
+          (err) => console.error("Failed to open URL:", err)
+        );
+      },
+    },
+    {
+      label: "Terms and Conditions",
+      darkIcon: <TermsDarkIcon />,
+      lightIcon: <TermsLightIcon />,
+      onPress: () => {
+        Linking.openURL("https://marketbriefs.co.in/termsanconditions").catch(
+          (err) => console.error("Failed to open URL:", err)
+        );
+      },
+    },
+  ];
+  const appInfoOptions: OptionItem[] = [
+    {
+      label: "About Us",
+      darkIcon: <AboutUsDarkIcon />,
+      lightIcon: <AboutUsLightIcon />,
+      onPress: () => navigation.navigate("AboutUsScreen"),
+    },
+    {
+      label: "About App",
+      darkIcon: <AboutUsDarkIcon />,
+      lightIcon: <AboutUsLightIcon />,
+      onPress: () => navigation.navigate("AboutAppScreen"),
+    },
+    {
+      label: "Appearence",
+      darkIcon: <AppearenceIconWhite />,
+      lightIcon: <AppearenceIconBlack />,
+      onPress: () => navigation.navigate("AppearanceScreen"),
+    },
+  ];
   useEffect(() => {
-    getUserProfileAPI();
-  }, []);
-  useBackPressNavigate("Profile");
-  const capitalizeFirstLetter = (text: string | undefined) => {
-    if (!text) return "";
-    return text.charAt(0).toUpperCase() + text.slice(1);
-  };
-  if (isLoading) return <Loader />;
+    const fetchProfile = async () => {
+      const { name, email, profile } = await loadProfileData();
+      setUserName(name);
+      setUserEmail(email);
+      setUserProfile(profile);
+    };
 
-  return (
-    <ScrollView
-      style={[globalStyles.pageContainerWithBackground(theme)]}
-      showsVerticalScrollIndicator={false}
-      contentContainerStyle={{
-        //justifyContent: "space-between",
-        justifyContent: "flex-start",
-        flex: 1,
-        height: "100%",
-      }}
-    >
-      <View style={styles.arrowSavedContainer}>
-        <Header
-          onBackClick={() => {
-            navigation.navigate("Profile");
-          }}
-        />
-      </View>
-      <View style={styles.paymentsHeadingContainer}>
+    fetchProfile();
+  }, []);
+  useBackPressNavigate("Home");
+
+  const renderSection = (title: string, options: OptionItem[]) => {
+    return (
+      <View style={styles.section}>
         <Text
           style={[
-            styles.paymentsHeadingText,
-            { color: theme == "dark" ? colors.white : colors.octodenaryText },
-          ]}
-        >
-          Get Premium
-        </Text>
-        <Text
-          style={[
-            styles.paymentsSubHeadingText,
+            styles.sectionTitle,
             {
               color:
-                theme == "dark"
-                  ? colors.darkSenaryText
-                  : colors.novemdenaryText,
+                theme === "light"
+                  ? colors.octodenaryText
+                  : colors.darkPrimaryText,
             },
           ]}
         >
-          Go ad-free and unlock all features
+          {title}
         </Text>
+        <View>{options.map(renderOption)}</View>
       </View>
-      <ScrollView
-        style={styles.paymentPlanCardContainers}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={{ gap: 24 }}>
-          {plans.map((plan, index) => {
-            const isSelected = selectedPlan === plan.id;
-            const CardWrapper = plan.backgroundImage ? ImageBackground : View;
-            const cardProps = plan.backgroundImage
-              ? {
-                  source:
+    );
+  };
+  const renderOption = ({
+    label,
+    darkIcon,
+    lightIcon,
+    onPress,
+  }: OptionItem) => {
+    return (
+      <TouchableOpacity key={label} onPress={onPress} style={styles.optionRow}>
+        <View style={styles.iconOptionContainer}>
+          {theme === "dark" ? darkIcon : lightIcon}
+          <Text
+            style={[
+              styles.labelText,
+              {
+                color:
+                  theme === "dark"
+                    ? colors.nonaryBorder
+                    : colors.tertiaryButtonColor,
+              },
+            ]}
+          >
+            {label}
+          </Text>
+        </View>
+        <View style={styles.appearenceTextArrowContainer}>
+          {label == "Appearence" && (
+            <Text
+              style={[
+                styles.appearenceText,
+                {
+                  color:
+                    theme == "dark"
+                      ? colors.tertiaryButtonColor
+                      : colors.darkSenaryText,
+                },
+              ]}
+            >
+              {theme == "dark" ? "Dark" : "Light"}
+            </Text>
+          )}
+          <TouchableOpacity onPress={onPress}>
+            <ForwardIcon />
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <SafeAreaView
+      style={[
+        globalStyles.pageContainerWithBackground(theme),
+        { flex: 1, justifyContent: "space-between", paddingBottom: 10 },
+      ]}
+    >
+      <View>
+        <View style={styles.headerContainer}>
+          <Header showBackArrow={false} showThemeIcon={false} />
+        </View>
+        <View
+          style={[
+            styles.profileContainer,
+            // {
+            //   backgroundColor:
+            //     theme === "dark"
+            //       ? colors.darkQuinaryBackground
+            //       : colors.primaryBackground,
+            // },
+          ]}
+        >
+          {userProfile ? (
+            <Image source={{ uri: userProfile }} style={styles.profileImage} />
+          ) : (
+            <ProfileAvatar name={userName} />
+          )}
+          <View style={[styles.userDetailsContainer]}>
+            <Text
+              style={[
+                styles.userNameStyle,
+                {
+                  color:
                     theme === "dark"
-                      ? require("../../../assets/images/paymentImageDark.png")
-                      : require("../../../assets/images/paymentImageLight.png"),
-                  imageStyle: { borderRadius: 24, opacity: 0.2 }, // rounded corners
-                  resizeMode: "cover" as "cover",
-                }
-              : {};
-            return (
-              <TouchableOpacity
-                key={plan.id}
-                onPress={() => setSelectedPlan(plan.id)}
-                activeOpacity={0.9}
+                      ? colors.darkPrimaryText
+                      : colors.octodenaryText,
+                },
+              ]}
+            >
+              {userName || "--"}
+            </Text>
+            <Text
+              style={[
+                styles.userEmailStyle,
+                {
+                  color:
+                    theme === "light"
+                      ? colors.novemdenaryText
+                      : colors.darkSenaryText,
+                },
+              ]}
+            >
+              {userEmail || "--"}
+            </Text>
+          </View>
+        </View>
+        <>
+          {/* <View
+            style={[
+              styles.premiumButton,
+              {
+                backgroundColor:
+                  theme === "dark" ? colors.vigenaryText : colors.sexdenaryText,
+              },
+            ]}
+          >
+            <View
+              style={{ flexDirection: "row", gap: 16, alignItems: "center" }}
+            >
+              <View
+                style={[
+                  styles.premiumIconContainer,
+                  {
+                    backgroundColor:
+                      theme == "dark"
+                        ? colors.octodenaryText
+                        : colors.primaryBackground,
+                  },
+                ]}
               >
-                <CardWrapper
-                  {...cardProps}
+                {theme == "dark" ? <PremiumIconDark /> : <PremiumIconLight />}
+              </View>
+              <View style={{ gap: 12 }}>
+                <Text style={[styles.premiumText]}>Get Premium</Text>
+                <Text
                   style={[
-                    styles.paymentPlanCard,
+                    styles.premiumSubText,
                     {
-                      borderColor: isSelected
-                        ? colors.sexdenaryText
-                        : theme === "dark"
-                        ? colors.darkUndenaryBackground
-                        : colors.nonaryBorder,
-                      borderWidth: 1,
+                      color:
+                        theme === "light"
+                          ? colors.septendenaryBackground
+                          : colors.white,
                     },
                   ]}
                 >
-                  {/* Popular Label */}
-                  {plan.popular && (
-                    <View style={styles.popularContainerStyle}>
-                      <Text style={styles.popularText}>Popular</Text>
-                    </View>
-                  )}
-                  {/* Title & Price */}
-                  <View style={styles.paymentTitleContainer}>
-                    <Text
-                      style={[
-                        styles.paymentTitleText,
-                        {
-                          color:
-                            theme === "dark"
-                              ? colors.white
-                              : colors.octodenaryText,
-                        },
-                      ]}
-                    >
-                      {plan.title}
-                    </Text>
-                    <View style={styles.planRateContainer}>
-                      <Text
-                        style={[
-                          styles.currencySymbolText,
-                          {
-                            color:
-                              theme === "dark"
-                                ? colors.white
-                                : colors.octodenaryText,
-                          },
-                        ]}
-                      >
-                        ₹
-                      </Text>
-                      <Text
-                        style={[
-                          styles.rateText,
-                          {
-                            color:
-                              theme === "dark"
-                                ? colors.white
-                                : colors.octodenaryText,
-                          },
-                        ]}
-                      >
-                        {plan.price}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.monthText,
-                          {
-                            color:
-                              theme === "dark"
-                                ? colors.white
-                                : colors.octodenaryText,
-                          },
-                        ]}
-                      >
-                        / mo
-                      </Text>
-                    </View>
-                  </View>
-                  {/* Features */}
-                  <View style={styles.paymentDetails}>
-                    {plan.features.map((feature, fIndex) => (
-                      <View style={styles.paymentDetailsInfoLine} key={fIndex}>
-                        <PaymentDetailsIcon />
-                        <Text
-                          style={[
-                            styles.paymentDetailsInfoText,
-                            {
-                              color:
-                                theme === "dark"
-                                  ? colors.white
-                                  : colors.octodenaryText,
-                            },
-                          ]}
-                        >
-                          {feature}
-                        </Text>
-                      </View>
-                    ))}
-                  </View>
-                  {/* Button & Note */}
-                  <View style={{ gap: 16 }}>
-                    <Button
-                      title={plan.button.title}
-                      variant={plan.button.variant}
-                    />
-                    {plan.note && (
-                      <Text
-                        style={[
-                          styles.premiumNoteText,
-                          {
-                            color:
-                              theme === "dark"
-                                ? colors.darkSenaryText
-                                : colors.novemdenaryText,
-                          },
-                        ]}
-                      >
-                        {plan.note}
-                      </Text>
-                    )}
-                  </View>
-                </CardWrapper>
-              </TouchableOpacity>
-            );
-          })}
+                  Monthly Subscription
+                </Text>
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.seePlansContainer}
+              onPress={() => {
+                navigation.navigate("Profile", { screen: "PaymentScreen" });
+              }}
+            >
+              <Text style={[styles.seePlansText]}>See Plans</Text>
+              <SeePlansArrow />
+            </TouchableOpacity>
+          </View> */}
+        </>
+      </View>
+      <View style={{ flex: 1, gap: 30 }}>
+        <View style={{ flex: 1 }}>
+          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+            <View style={styles.optionContainer}>
+              {renderSection("Profile", accountOptions)}
+              {renderSection("Support", supportOptions)}
+              {renderSection("Legal", legalOptions)}
+              {renderSection("App Info", appInfoOptions)}
+            </View>
+          </ScrollView>
         </View>
-      </ScrollView>
-    </ScrollView>
+        <View style={styles.logoutContainer}>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Text
+              style={[
+                styles.logoutText,
+                {
+                  color: colors.quaternaryButtonColor,
+                },
+              ]}
+            >
+              Log out
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
   );
-}
+};
+
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  arrowSavedContainer: {
-    flexDirection: "row",
+  headerContainer: {
+    //  marginTop: 30,
+  },
+  profileContainer: {
     alignItems: "center",
-    gap: 1,
-    paddingTop: 0, // space for status bar
-    paddingBottom: 16,
+    marginVertical: 20,
+    gap: 16,
   },
-  paymentsHeadingContainer: {
-    gap: 12,
-    alignItems: "center",
-    marginBottom: 36,
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 9999,
   },
-  paymentsHeadingText: {
-    fontSize: 24,
-    fontFamily: fontFamily.Inter700,
+  userDetailsContainer: { gap: 10, alignItems: "center" },
+  userNameStyle: {
+    fontSize: 18,
+    fontFamily: fontFamily.Cabinet700,
   },
-  paymentsSubHeadingText: {
-    fontSize: 16,
+  userEmailStyle: {
+    fontSize: 14,
     fontFamily: fontFamily.Inter400,
   },
-  paymentPlanCardContainers: {
-    gap: 24,
-  },
-  paymentPlanCard: {
-    gap: 24,
-    borderRadius: 24,
-    borderWidth: 1,
-    padding: 24,
-  },
-  popularContainerStyle: {
-    position: "absolute",
-    top: -10,
-    right: 15,
-    backgroundColor: colors.sexdenaryText,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+  premiumButton: {
     borderRadius: 12,
-  },
-  popularText: {
-    fontSize: 11,
-    fontFamily: fontFamily.Inter400,
-    color: colors.white,
-  },
-  paymentTitleContainer: {
+    marginBottom: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 8,
   },
-  paymentTitleText: {
-    fontSize: 24,
-    fontFamily: fontFamily.Inter600,
-  },
-  planRateContainer: {
-    flexDirection: "row",
+  premiumIconContainer: {
+    padding: 12,
+    borderRadius: 24,
+    gap: 10,
+    display: "flex",
+    justifyContent: "center",
     alignItems: "center",
   },
-  currencySymbolText: {
-    fontSize: 16,
-    fontFamily: fontFamily.Inter600,
+  premiumText: {
+    color: colors.white,
+    fontSize: 18,
+    fontFamily: fontFamily.Inter700,
   },
-  rateText: {
-    fontSize: 24,
-    fontFamily: fontFamily.Inter600,
-  },
-  monthText: {
+  premiumSubText: {
     fontSize: 14,
     fontFamily: fontFamily.Inter400,
   },
-  paymentDetails: {
-    gap: 10,
-  },
-  paymentDetailsInfoLine: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  paymentDetailsInfoText: {
-    fontSize: 14,
-    fontFamily: fontFamily.Inter400,
-  },
-  premiumNoteText: {
+  seePlansContainer: { flexDirection: "row", alignItems: "center", gap: 12 },
+  seePlansText: {
+    color: colors.white,
     fontSize: 12,
     fontFamily: fontFamily.Inter400,
+  },
+  optionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+  },
+  optionContainer: {
+    gap: 16,
+    flex: 1,
+  },
+  iconOptionContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  iconWrapper: {},
+  labelText: {
+    fontSize: 16,
+    fontFamily: fontFamily.Inter400,
+  },
+  section: {
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: fontFamily.Inter700,
+  },
+
+  appearenceTextArrowContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  appearenceText: {
+    fontFamily: fontFamily.Inter400,
+    fontSize: 12,
+  },
+  logoutContainer: {
+    // position: "absolute",
+    // bottom: 20,
+    // left: 0,
+    // right: 0,
+    alignItems: "center",
+  },
+  logoutButton: {
+    alignItems: "center",
+    position: "absolute",
+    bottom: 0,
+  },
+  logoutText: {
+    fontFamily: fontFamily.Inter400,
+    fontSize: 16,
   },
 });

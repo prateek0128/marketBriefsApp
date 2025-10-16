@@ -1,56 +1,52 @@
-import React, { use, useContext, useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
+  CommonActions,
+  NavigationProp,
+  useNavigation,
+} from "@react-navigation/native";
+import * as WebBrowser from "expo-web-browser";
+import React, { useContext, useEffect, useState } from "react";
+import {
   Image,
-  TouchableOpacity,
-  ScrollView,
   SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
 import {
-  DarkHelp,
-  DarkMyintresetIcon,
-  DarkProfileIcon,
-  DarkSavedIcon,
-  DarkSetting,
-  EditProfileIcon,
-  HelpIcon,
-  MyIntrestIcon,
-  SavedIcon,
-  SettingIcon,
-  ForwardIcon,
-  SeePlansArrow,
+  AboutUsDarkIcon,
+  AboutUsLightIcon,
   AppearenceIconBlack,
   AppearenceIconWhite,
-} from "../../../assets/icons/components/Profile";
-
-import { Ionicons } from "@expo/vector-icons";
-import {
-  useNavigation,
-  NavigationProp,
-  CommonActions,
-} from "@react-navigation/native";
-import { RootStackParamList } from "../../../types/navigation";
-import fontFamily from "../../../assets/styles/fontFamily";
-import { ThemeContext } from "../../../context/themeContext";
+  ContactUsDarkIcon,
+  ContactUsLightIcon,
+  DarkProfileIcon,
+  EditProfileIcon,
+  ForwardIcon,
+  PrivacyDarkIcon,
+  PrivacyLightIcon,
+  TermsDarkIcon,
+  TermsLightIcon,
+} from "../../../assets/icons/components/profile";
 import { colors } from "../../../assets/styles/colors";
+import fontFamily from "../../../assets/styles/fontFamily";
 import globalStyles from "../../../assets/styles/globalStyles";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AuthContext } from "../../../context/loginAuthContext";
 import Header from "../../../components/header/header";
-import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
-import { storage } from "../../../utils/storage";
-import { loadProfileData } from "../../../utils/loadProfileData";
 import ProfileAvatar from "../../../components/profileAvatar/profileAvatar";
+import { AuthContext } from "../../../context/loginAuthContext";
+import { ThemeContext } from "../../../context/themeContext";
+import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
+import { RootStackParamList } from "../../../types/navigation";
+import { loadProfileData } from "../../../utils/loadProfileData";
+
 type OptionItem = {
   label: string;
   darkIcon: React.ReactNode;
   lightIcon: React.ReactNode;
   onPress: () => void;
 };
-
+WebBrowser.maybeCompleteAuthSession();
 const ProfileScreen = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { theme } = useContext(ThemeContext);
@@ -58,6 +54,7 @@ const ProfileScreen = () => {
   const [userName, setUserName] = useState("--");
   const [userEmail, setUserEmail] = useState("--");
   const [userProfile, setUserProfile] = useState("");
+
   const handleLogout = () => {
     console.log("Logged out");
     logout();
@@ -70,31 +67,74 @@ const ProfileScreen = () => {
   };
   const accountOptions: OptionItem[] = [
     {
-      label: "Profile Details",
+      label: "Account Settings",
       darkIcon: <DarkProfileIcon />,
       lightIcon: <EditProfileIcon />,
       onPress: () => navigation.navigate("EditProfileScreen"),
     },
     // {
-    //   label: "My Interests",
-    //   darkIcon: <DarkMyintresetIcon />,
-    //   lightIcon: <MyIntrestIcon />,
-    //   onPress: () => navigation.navigate("ChooseYourInterests", {}),
-    // },
-    // {
-    //   label: "Saved Articles",
-    //   darkIcon: <DarkSavedIcon />,
-    //   lightIcon: <SavedIcon />,
-    //   onPress: () =>
-    //     navigation.navigate("Profile", { screen: "SavedArticles" }),
+    //   label: "Delete Account",
+    //   darkIcon: <AppearenceIconWhite />,
+    //   lightIcon: <AppearenceIconBlack />,
+    //   onPress: () => setShowDeleteModal(true),
     // },
   ];
-  const moreOptions: OptionItem[] = [
+  const supportOptions: OptionItem[] = [
+    // {
+    //   label: "Help",
+    //   darkIcon: <DarkHelp />,
+    //   lightIcon: <HelpIcon />,
+    //   onPress: () => {},
+    // },
     {
-      label: "Help",
-      darkIcon: <DarkHelp />,
-      lightIcon: <HelpIcon />,
-      onPress: () => {},
+      label: "Contact Us",
+      darkIcon: <ContactUsDarkIcon />,
+      lightIcon: <ContactUsLightIcon />,
+      onPress: () => navigation.navigate("ContactUsScreen"),
+    },
+  ];
+  const legalOptions: OptionItem[] = [
+    {
+      label: "Privacy Policy",
+      darkIcon: <PrivacyDarkIcon />,
+      lightIcon: <PrivacyLightIcon />,
+      onPress: async () => {
+        try {
+          await WebBrowser.openBrowserAsync(
+            "https://marketbriefs.co.in/privacypolicy"
+          );
+        } catch (err) {
+          console.error("Failed to open URL:", err);
+        }
+      },
+    },
+    {
+      label: "Terms and Conditions",
+      darkIcon: <TermsDarkIcon />,
+      lightIcon: <TermsLightIcon />,
+      onPress: async () => {
+        try {
+          await WebBrowser.openBrowserAsync(
+            "https://marketbriefs.co.in/termsanconditions"
+          );
+        } catch (err) {
+          console.error("Failed to open URL:", err);
+        }
+      },
+    },
+  ];
+  const appInfoOptions: OptionItem[] = [
+    {
+      label: "About Us",
+      darkIcon: <AboutUsDarkIcon />,
+      lightIcon: <AboutUsLightIcon />,
+      onPress: () => navigation.navigate("AboutUsScreen"),
+    },
+    {
+      label: "About App",
+      darkIcon: <AboutUsDarkIcon />,
+      lightIcon: <AboutUsLightIcon />,
+      onPress: () => navigation.navigate("AboutAppScreen"),
     },
     {
       label: "Appearence",
@@ -103,6 +143,17 @@ const ProfileScreen = () => {
       onPress: () => navigation.navigate("AppearanceScreen"),
     },
   ];
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { name, email, profile } = await loadProfileData();
+      setUserName(name);
+      setUserEmail(email);
+      setUserProfile(profile);
+    };
+
+    fetchProfile();
+  }, []);
+  useBackPressNavigate("Home");
 
   const renderSection = (title: string, options: OptionItem[]) => {
     return (
@@ -164,82 +215,71 @@ const ProfileScreen = () => {
               {theme == "dark" ? "Dark" : "Light"}
             </Text>
           )}
-          <TouchableOpacity onPress={() => {}}>
+          <TouchableOpacity onPress={onPress}>
             <ForwardIcon />
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
     );
   };
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { name, email, profile } = await loadProfileData();
-      setUserName(name);
-      setUserEmail(email);
-      setUserProfile(profile);
-    };
 
-    fetchProfile();
-  }, []);
-  useBackPressNavigate("Home");
   return (
-    <SafeAreaView style={[globalStyles.pageContainerWithBackground(theme)]}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ justifyContent: "space-between", flex: 1 }}
-      >
-        <View>
-          <View style={styles.headerContainer}>
-            <Header showBackArrow={false} showThemeIcon={false} />
+    <SafeAreaView
+      style={[
+        globalStyles.pageContainerWithBackground(theme),
+        { flex: 1, justifyContent: "space-between", paddingBottom: 10 },
+      ]}
+    >
+      <View>
+        <View style={styles.headerContainer}>
+          <Header showBackArrow={false} showThemeIcon={false} />
+        </View>
+        <View
+          style={[
+            styles.profileContainer,
+            // {
+            //   backgroundColor:
+            //     theme === "dark"
+            //       ? colors.darkQuinaryBackground
+            //       : colors.primaryBackground,
+            // },
+          ]}
+        >
+          {userProfile ? (
+            <Image source={{ uri: userProfile }} style={styles.profileImage} />
+          ) : (
+            <ProfileAvatar name={userName} />
+          )}
+          <View style={[styles.userDetailsContainer]}>
+            <Text
+              style={[
+                styles.userNameStyle,
+                {
+                  color:
+                    theme === "dark"
+                      ? colors.darkPrimaryText
+                      : colors.octodenaryText,
+                },
+              ]}
+            >
+              {userName || "--"}
+            </Text>
+            <Text
+              style={[
+                styles.userEmailStyle,
+                {
+                  color:
+                    theme === "light"
+                      ? colors.novemdenaryText
+                      : colors.darkSenaryText,
+                },
+              ]}
+            >
+              {userEmail || "--"}
+            </Text>
           </View>
-          <View
-            style={[
-              styles.profileContainer,
-              // {
-              //   backgroundColor:
-              //     theme === "dark"
-              //       ? colors.darkQuinaryBackground
-              //       : colors.primaryBackground,
-              // },
-            ]}
-          >
-            {userProfile ? (
-              <Image
-                source={{ uri: userProfile }}
-                style={styles.profileImage}
-              />
-            ) : (
-              <ProfileAvatar name={userName} />
-            )}
-            <View style={[styles.userDetailsContainer]}>
-              <Text
-                style={[
-                  styles.userNameStyle,
-                  {
-                    color:
-                      theme === "dark"
-                        ? colors.darkPrimaryText
-                        : colors.octodenaryText,
-                  },
-                ]}
-              >
-                {userName || "--"}
-              </Text>
-              <Text
-                style={[
-                  styles.userEmailStyle,
-                  {
-                    color:
-                      theme === "light"
-                        ? colors.novemdenaryText
-                        : colors.darkSenaryText,
-                  },
-                ]}
-              >
-                {userEmail || "--"}
-              </Text>
-            </View>
-          </View>
+        </View>
+        <>
           {/* <View
             style={[
               styles.premiumButton,
@@ -249,21 +289,38 @@ const ProfileScreen = () => {
               },
             ]}
           >
-            <View style={{ gap: 12 }}>
-              <Text style={[styles.premiumText]}>Premium Membership</Text>
-              <Text
+            <View
+              style={{ flexDirection: "row", gap: 16, alignItems: "center" }}
+            >
+              <View
                 style={[
-                  styles.premiumSubText,
+                  styles.premiumIconContainer,
                   {
-                    color:
-                      theme === "light"
-                        ? colors.septendenaryBackground
-                        : colors.white,
+                    backgroundColor:
+                      theme == "dark"
+                        ? colors.octodenaryText
+                        : colors.primaryBackground,
                   },
                 ]}
               >
-                Upgrade for more features
-              </Text>
+                {theme == "dark" ? <PremiumIconDark /> : <PremiumIconLight />}
+              </View>
+              <View style={{ gap: 12 }}>
+                <Text style={[styles.premiumText]}>Get Premium</Text>
+                <Text
+                  style={[
+                    styles.premiumSubText,
+                    {
+                      color:
+                        theme === "light"
+                          ? colors.septendenaryBackground
+                          : colors.white,
+                    },
+                  ]}
+                >
+                  Monthly Subscription
+                </Text>
+              </View>
             </View>
             <TouchableOpacity
               style={styles.seePlansContainer}
@@ -275,12 +332,20 @@ const ProfileScreen = () => {
               <SeePlansArrow />
             </TouchableOpacity>
           </View> */}
-          <View style={styles.optionContainer}>
-            {renderSection("Account", accountOptions)}
-            {renderSection("More", moreOptions)}
-          </View>
+        </>
+      </View>
+      <View style={{ flex: 1, gap: 30 }}>
+        <View style={{ flex: 1 }}>
+          <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+            <View style={styles.optionContainer}>
+              {renderSection("Profile", accountOptions)}
+              {renderSection("Support", supportOptions)}
+              {renderSection("Legal", legalOptions)}
+              {renderSection("App Info", appInfoOptions)}
+            </View>
+          </ScrollView>
         </View>
-        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+        <View style={styles.logoutContainer}>
           <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
             <Text
               style={[
@@ -294,7 +359,7 @@ const ProfileScreen = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -303,7 +368,7 @@ export default ProfileScreen;
 
 const styles = StyleSheet.create({
   headerContainer: {
-    marginTop: 30,
+    //  marginTop: 30,
   },
   profileContainer: {
     alignItems: "center",
@@ -333,6 +398,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  premiumIconContainer: {
+    padding: 12,
+    borderRadius: 24,
+    gap: 10,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   premiumText: {
     color: colors.white,
     fontSize: 18,
@@ -356,6 +429,7 @@ const styles = StyleSheet.create({
   },
   optionContainer: {
     gap: 16,
+    flex: 1,
   },
   iconOptionContainer: {
     flexDirection: "row",
@@ -374,15 +448,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fontFamily.Inter700,
   },
-  logoutButton: {
-    alignItems: "center",
-    position: "absolute",
-    bottom: 0,
-  },
-  logoutText: {
-    fontFamily: fontFamily.Inter400,
-    fontSize: 16,
-  },
+
   appearenceTextArrowContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -391,5 +457,21 @@ const styles = StyleSheet.create({
   appearenceText: {
     fontFamily: fontFamily.Inter400,
     fontSize: 12,
+  },
+  logoutContainer: {
+    // position: "absolute",
+    // bottom: 20,
+    // left: 0,
+    // right: 0,
+    alignItems: "center",
+  },
+  logoutButton: {
+    alignItems: "center",
+    position: "absolute",
+    bottom: 0,
+  },
+  logoutText: {
+    fontFamily: fontFamily.Inter400,
+    fontSize: 16,
   },
 });

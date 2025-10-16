@@ -1,26 +1,16 @@
 // screens/AppearanceScreen.tsx
 
-import React, { useState, useContext } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ThemeContext } from "../../../context/themeContext";
-import globalStyles from "../../../assets/styles/globalStyles";
-import Header from "../../../components/header/header";
-import {
-  useNavigation,
-  NavigationProp,
-  CommonActions,
-} from "@react-navigation/native";
-import { RootStackParamList } from "../../../types/navigation";
-import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { useContext, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { colors } from "../../../assets/styles/colors";
 import fontFamily from "../../../assets/styles/fontFamily";
+import globalStyles from "../../../assets/styles/globalStyles";
+import Header from "../../../components/header/header";
+import { ThemeContext } from "../../../context/themeContext";
+import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
+import { RootStackParamList } from "../../../types/navigation";
 type ThemeOption = "light" | "dark";
 
 const options = [
@@ -236,6 +226,7 @@ const styles = StyleSheet.create({
     fontFamily: fontFamily.Inter700,
     marginBottom: 24,
     marginTop: 10,
+    textAlign: "center",
   },
   title: {
     fontSize: 18,
