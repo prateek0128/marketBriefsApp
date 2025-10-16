@@ -3,10 +3,10 @@ import {
   NavigationProp,
   useNavigation,
 } from "@react-navigation/native";
+import * as WebBrowser from "expo-web-browser";
 import React, { useContext, useEffect, useState } from "react";
 import {
   Image,
-  Linking,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -39,13 +39,14 @@ import { ThemeContext } from "../../../context/themeContext";
 import { useBackPressNavigate } from "../../../hooks/useBackPressNavigate";
 import { RootStackParamList } from "../../../types/navigation";
 import { loadProfileData } from "../../../utils/loadProfileData";
+
 type OptionItem = {
   label: string;
   darkIcon: React.ReactNode;
   lightIcon: React.ReactNode;
   onPress: () => void;
 };
-
+WebBrowser.maybeCompleteAuthSession();
 const ProfileScreen = () => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { theme } = useContext(ThemeContext);
@@ -97,20 +98,28 @@ const ProfileScreen = () => {
       label: "Privacy Policy",
       darkIcon: <PrivacyDarkIcon />,
       lightIcon: <PrivacyLightIcon />,
-      onPress: () => {
-        Linking.openURL("https://marketbriefs.co.in/privacypolicy").catch(
-          (err) => console.error("Failed to open URL:", err)
-        );
+      onPress: async () => {
+        try {
+          await WebBrowser.openBrowserAsync(
+            "https://marketbriefs.co.in/privacypolicy"
+          );
+        } catch (err) {
+          console.error("Failed to open URL:", err);
+        }
       },
     },
     {
       label: "Terms and Conditions",
       darkIcon: <TermsDarkIcon />,
       lightIcon: <TermsLightIcon />,
-      onPress: () => {
-        Linking.openURL("https://marketbriefs.co.in/termsanconditions").catch(
-          (err) => console.error("Failed to open URL:", err)
-        );
+      onPress: async () => {
+        try {
+          await WebBrowser.openBrowserAsync(
+            "https://marketbriefs.co.in/termsanconditions"
+          );
+        } catch (err) {
+          console.error("Failed to open URL:", err);
+        }
       },
     },
   ];
